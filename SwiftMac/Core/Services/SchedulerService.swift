@@ -2,7 +2,7 @@ import Foundation
 import UserNotifications
 
 @MainActor
-class SchedulerService: ObservableObject {
+final class SchedulerService: ObservableObject {
     static let shared = SchedulerService()
 
     enum CleaningInterval: String, CaseIterable {
@@ -35,7 +35,10 @@ class SchedulerService: ObservableObject {
     private func setup() {
         cancel()
         timer = Timer.scheduledTimer(withTimeInterval: interval.seconds, repeats: true) { [weak self] _ in
-            Task { await self?.run() }
+            guard let self else { return }
+            Task { @MainActor in
+                await self.run()
+            }
         }
     }
     private func cancel() { timer?.invalidate(); timer = nil }

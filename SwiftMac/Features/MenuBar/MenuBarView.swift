@@ -20,7 +20,11 @@ struct MenuBarView: View {
             }
             .padding([.horizontal, .top])
             Divider()
-            Button { Task { isScanning = true; _ = try? await ScanEngine.shared.scanAll { _,_ in }; isScanning = false } } label: {
+            Button {
+                Task {
+                    await runQuickScan()
+                }
+            } label: {
                 Label(isScanning ? "Scanning..." : "Quick Scan", systemImage: "sparkles").frame(maxWidth: .infinity, alignment: .leading)
             }
             .disabled(isScanning).padding(.horizontal)
@@ -38,5 +42,14 @@ struct MenuBarView: View {
         let a = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory())
         diskTotal = (a?[.systemSize] as? Int64) ?? 0
         diskFree  = (a?[.systemFreeSize] as? Int64) ?? 0
+    }
+
+    @MainActor
+    private func runQuickScan() async {
+        guard !isScanning else { return }
+        isScanning = true
+        defer { isScanning = false }
+
+        _ = try? await ScanEngine.shared.scanAll { _, _ in }
     }
 }
