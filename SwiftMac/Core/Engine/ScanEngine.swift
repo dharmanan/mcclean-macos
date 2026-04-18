@@ -11,7 +11,7 @@ actor ScanEngine {
     func cancel() { isCancelled = true }
 
     func scanAll(
-        progress: @escaping @Sendable (CategoryType, ScanCategory) -> Void
+        progress: @escaping @MainActor @Sendable (CategoryType, ScanCategory) -> Void
     ) async throws -> [ScanCategory] {
         isCancelled = false
 
@@ -32,7 +32,7 @@ actor ScanEngine {
                     let items = try await scanner.scan()
                     let totalSize = items.reduce(0) { $0 + $1.size }
                     let category = ScanCategory(type: type, items: items, totalSize: totalSize)
-                    await MainActor.run { progress(type, category) }
+                    await progress(type, category)
                     return category
                 }
             }
