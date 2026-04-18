@@ -13,28 +13,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode 16
-        run: sudo xcode-select -switch /Applications/Xcode_16.app
-
-      - name: Build
+      - name: Select installed Xcode
         run: |
-          xcodebuild \
-            -project SwiftMac.xcodeproj \
-            -scheme SwiftMac \
-            -configuration Debug \
-            -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO \
-            build
+          shopt -s nullglob
+          xcode_dirs=(/Applications/Xcode*.app/Contents/Developer)
+          if [ ${#xcode_dirs[@]} -eq 0 ]; then
+            echo "No Xcode installation found under /Applications"
+            exit 1
+          fi
 
-      - name: Test
-        run: |
-          xcodebuild \
-            -project SwiftMac.xcodeproj \
-            -scheme SwiftMac \
-            -configuration Debug \
-            -destination 'platform=macOS' \
-            CODE_SIGNING_ALLOWED=NO \
-            test
+          last_index=$((${#xcode_dirs[@]} - 1))
+          sudo xcode-select -switch "${xcode_dirs[$last_index]}"
+          xcodebuild -version
+
+      - name: Smoke test
+        run: bash ./smoke-test-macos.sh
 
   release:
     runs-on: macos-14
@@ -43,6 +36,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Select installed Xcode
+        run: |
+          shopt -s nullglob
+          xcode_dirs=(/Applications/Xcode*.app/Contents/Developer)
+          if [ ${#xcode_dirs[@]} -eq 0 ]; then
+            echo "No Xcode installation found under /Applications"
+            exit 1
+          fi
+
+          last_index=$((${#xcode_dirs[@]} - 1))
+          sudo xcode-select -switch "${xcode_dirs[$last_index]}"
+          xcodebuild -version
+
+      - name: Generate project
+        run: bash ./setup.sh
 
       - name: Archive
         run: |

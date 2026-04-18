@@ -38,22 +38,22 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.yourname.swiftmactests
 
-    SwiftMacUITests:
-        type: bundle.ui-testing
-        platform: macOS
-        sources:
-            - path: SwiftMacUITests
-        dependencies:
-            - target: SwiftMac
-        settings:
-            base:
-                PRODUCT_BUNDLE_IDENTIFIER: com.yourname.swiftmacuitests
+  SwiftMacUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - path: SwiftMacUITests
+    dependencies:
+      - target: SwiftMac
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.yourname.swiftmacuitests
 
-    SwiftMacHelper:
-        type: xpc-service
-        platform: macOS
-        sources:
-            - path: SwiftMacHelper
-        settings:
-            base:
-                PRODUCT_BUNDLE_IDENTIFIER: com.yourname.swiftmachelper
+  SwiftMacHelper:
+    type: xpc-service
+    platform: macOS
+    sources:
+      - path: SwiftMacHelper
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.yourname.swiftmachelper
