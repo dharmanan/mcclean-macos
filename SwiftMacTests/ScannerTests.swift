@@ -41,7 +41,8 @@ struct ScannerTests {
         let items = try await scanner.scan()
 
         #expect(items.count == 1)
-        #expect(items.first?.url == newer)
+        #expect(items.first?.name == newer.lastPathComponent)
+        #expect(items.first?.modifiedDate == Date(timeIntervalSince1970: 2_000))
     }
 
     @Test("Trash scanner reads configured trash directory")
