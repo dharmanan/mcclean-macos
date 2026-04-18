@@ -2,11 +2,18 @@ import Foundation
 import CryptoKit
 
 struct DuplicateScanner: ScannerProtocol {
-    func scan() async throws -> [FileItem] {
+    let searchDirectories: [URL]
+
+    init(searchDirectories: [URL]? = nil) {
         let home = FileManager.default.homeDirectoryForCurrentUser
-        let dirs = ["Downloads","Documents","Desktop","Pictures"].map { home.appendingPathComponent($0) }
+        self.searchDirectories = searchDirectories ?? ["Downloads", "Documents", "Desktop", "Pictures"].map {
+            home.appendingPathComponent($0)
+        }
+    }
+
+    func scan() async throws -> [FileItem] {
         var all: [FileItem] = []
-        for dir in dirs { all += gatherFiles(in: dir) }
+        for dir in searchDirectories { all += gatherFiles(in: dir) }
         return findDuplicates(in: all)
     }
 

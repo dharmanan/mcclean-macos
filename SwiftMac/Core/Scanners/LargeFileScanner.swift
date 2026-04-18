@@ -1,13 +1,20 @@
 import Foundation
 
 struct LargeFileScanner: ScannerProtocol {
-    let minSizeBytes: Int64 = 100 * 1024 * 1024
+    let searchDirectories: [URL]
+    let minSizeBytes: Int64
+
+    init(searchDirectories: [URL]? = nil, minSizeBytes: Int64 = 100 * 1024 * 1024) {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        self.searchDirectories = searchDirectories ?? ["Downloads", "Documents", "Desktop", "Movies"].map {
+            home.appendingPathComponent($0)
+        }
+        self.minSizeBytes = minSizeBytes
+    }
 
     func scan() async throws -> [FileItem] {
-        let home = FileManager.default.homeDirectoryForCurrentUser
-        let dirs = ["Downloads","Documents","Desktop","Movies"].map { home.appendingPathComponent($0) }
         var items: [FileItem] = []
-        for dir in dirs {
+        for dir in searchDirectories {
             guard let e = FileManager.default.enumerator(at: dir, includingPropertiesForKeys: [.fileSizeKey, .contentModificationDateKey, .isRegularFileKey]) else { continue }
             for case let url as URL in e {
                 let v = try? url.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey, .isRegularFileKey])
