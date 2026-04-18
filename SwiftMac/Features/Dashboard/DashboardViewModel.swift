@@ -19,9 +19,9 @@ class DashboardViewModel: ObservableObject {
         categories = []; scanState = .scanning; totalFound = 0; scanProgress = 0; count = 0
         do {
             let results = try await ScanEngine.shared.scanAll { _, cat in
-                categories.append(cat); count += 1
-                scanProgress = Double(count) / Double(totalCats)
-                totalFound += cat.totalSize
+                self.categories.append(cat); self.count += 1
+                self.scanProgress = Double(self.count) / Double(self.totalCats)
+                self.totalFound += cat.totalSize
             }
             categories = results; scanState = .done
         } catch { scanState = .idle }

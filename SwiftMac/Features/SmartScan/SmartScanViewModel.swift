@@ -17,8 +17,8 @@ final class SmartScanViewModel: ObservableObject {
 
         do {
             let results = try await ScanEngine.shared.scanAll { _, category in
-                categories.append(category)
-                totalFound += category.totalSize
+                self.categories.append(category)
+                self.totalFound += category.totalSize
             }
             categories = results
             totalFound = results.reduce(0) { $0 + $1.totalSize }
