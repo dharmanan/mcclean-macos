@@ -1,6 +1,6 @@
 # SwiftMac
 
-SwiftMac is a native macOS cleaning utility I built with SwiftUI, SwiftData, and Swift concurrency. The repository contains the app source, a bootstrap script for regenerating the project files, and the XcodeGen manifest used to produce the Xcode project on macOS.
+SwiftMac is a native macOS cleaning utility I built with SwiftUI, SwiftData, and Swift concurrency. The repository contains the app source, a lightweight bootstrap script for validating the checkout and generating the Xcode project, and the XcodeGen manifest used to produce the Xcode project on macOS.
 
 ## What it does
 
@@ -54,7 +54,7 @@ smoke-test-macos.sh macOS build and test smoke test
 
 ## Notes
 
-- `setup.sh` regenerates the project structure and source scaffolding in a clean checkout.
+- `setup.sh` validates the checkout and can generate the Xcode project in a macOS environment.
 - `project.yml` is the source of truth for the Xcode target layout.
 - In this Linux workspace the app project cannot be generated because `xcodegen` and Xcode are not available. On macOS, `xcodegen generate` is enough.
 - `ExportOptions.plist` still requires a real Apple team ID before archive/export.
