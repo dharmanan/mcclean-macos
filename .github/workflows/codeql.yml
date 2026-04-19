@@ -58,7 +58,7 @@ jobs:
 
           xcodebuild \
             -project SwiftMac.xcodeproj \
-            -scheme SwiftMac \
+            -target SwiftMac \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             build
