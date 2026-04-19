@@ -22,7 +22,7 @@ jobs:
     runs-on: macos-14
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Select installed Xcode
         run: |
@@ -38,15 +38,30 @@ jobs:
           xcodebuild -version
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: swift
 
-      - name: Generate project
-        run: bash ./setup.sh
+      - name: Build for CodeQL
+        run: |
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            if command -v brew >/dev/null 2>&1; then
+              arch -arm64 brew install xcodegen
+            else
+              echo "xcodegen is required to generate SwiftMac.xcodeproj"
+              exit 1
+            fi
+          fi
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+          xcodegen generate
+
+          xcodebuild \
+            -project SwiftMac.xcodeproj \
+            -scheme SwiftMac \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            build-for-testing
 
       - name: Analyze
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
