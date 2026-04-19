@@ -20,19 +20,19 @@ private struct MeasuredDiskMapPath: Sendable {
     let colorKey: String
 }
 
+private let defaultDiskMapPathSpecs: [DiskMapPathSpec] = [
+    DiskMapPathSpec(name: "Applications", rawPath: "/Applications", colorKey: "blue"),
+    DiskMapPathSpec(name: "Library", rawPath: "~/Library", colorKey: "purple"),
+    DiskMapPathSpec(name: "Documents", rawPath: "~/Documents", colorKey: "orange"),
+    DiskMapPathSpec(name: "Downloads", rawPath: "~/Downloads", colorKey: "green"),
+    DiskMapPathSpec(name: "Desktop", rawPath: "~/Desktop", colorKey: "pink"),
+]
+
 @MainActor
 final class DiskMapViewModel: ObservableObject {
     @Published var items: [DiskMapItem] = []
     @Published var totalUsed: Int64 = 0
     @Published var totalCapacity: Int64 = 0
-
-    private static let pathSpecs: [DiskMapPathSpec] = [
-        DiskMapPathSpec(name: "Applications", rawPath: "/Applications", colorKey: "blue"),
-        DiskMapPathSpec(name: "Library", rawPath: "~/Library", colorKey: "purple"),
-        DiskMapPathSpec(name: "Documents", rawPath: "~/Documents", colorKey: "orange"),
-        DiskMapPathSpec(name: "Downloads", rawPath: "~/Downloads", colorKey: "green"),
-        DiskMapPathSpec(name: "Desktop", rawPath: "~/Desktop", colorKey: "pink"),
-    ]
 
     func load() async {
         let attributes = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory())
@@ -42,7 +42,7 @@ final class DiskMapViewModel: ObservableObject {
         totalUsed = max(0, total - free)
 
         let measured = await Task.detached(priority: .userInitiated) {
-            Self.pathSpecs.map { spec in
+            defaultDiskMapPathSpecs.map { spec in
                 let expanded = (spec.rawPath as NSString).expandingTildeInPath
                 let size = FileManager.default.directorySize(at: URL(fileURLWithPath: expanded))
                 return MeasuredDiskMapPath(name: spec.name, size: size, colorKey: spec.colorKey)
