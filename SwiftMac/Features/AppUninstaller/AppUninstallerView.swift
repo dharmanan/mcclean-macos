@@ -12,36 +12,47 @@ struct AppUninstallerView: View {
                 Button("Refresh") {
                     Task { await viewModel.loadApps() }
                 }
+                .disabled(viewModel.isLoading)
             }
 
-            List(viewModel.apps) { app in
-                HStack(spacing: 12) {
-                    if let icon = app.icon {
-                        Image(nsImage: icon)
-                            .resizable()
-                            .frame(width: 32, height: 32)
-                    } else {
-                        Image(systemName: "app")
-                            .frame(width: 32, height: 32)
-                    }
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(app.name)
-                        Text(app.bundleIdentifier)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    Text(app.displaySize)
+            if viewModel.isLoading {
+                VStack(spacing: 12) {
+                    ProgressView()
+                    Text("Loading apps...")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List(viewModel.apps) { app in
+                    HStack(spacing: 12) {
+                        if let icon = app.icon {
+                            Image(nsImage: icon)
+                                .resizable()
+                                .frame(width: 32, height: 32)
+                        } else {
+                            Image(systemName: "app")
+                                .frame(width: 32, height: 32)
+                        }
 
-                    Button("Uninstall") {
-                        Task { await viewModel.uninstall(app) }
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(app.name)
+                            Text(app.bundleIdentifier)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+
+                        Text(app.displaySize)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Button("Uninstall") {
+                            Task { await viewModel.uninstall(app) }
+                        }
+                        .buttonStyle(.bordered)
                     }
-                    .buttonStyle(.bordered)
                 }
             }
         }

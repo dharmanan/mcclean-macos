@@ -19,6 +19,6 @@ final class PrivacyCleanerViewModel: ObservableObject {
 
     func clean() async {
         _ = await CleanEngine.shared.clean(items: items) { _, _ in }
-        items.removeAll()
+        items.removeAll { !FileManager.default.fileExists(atPath: $0.url.path) }
     }
 }

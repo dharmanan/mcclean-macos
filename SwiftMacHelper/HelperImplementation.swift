@@ -44,12 +44,14 @@ final class HelperImplementation: NSObject, HelperProtocol {
     }
 
     func removeItem(atPath path: String, withReply reply: @escaping (Bool) -> Void) {
-        guard isAllowedPath(path), FileManager.default.fileExists(atPath: path) else {
+        guard isAllowedPath(path) else {
             reply(false)
             return
         }
         do {
             try FileManager.default.removeItem(atPath: path)
+            reply(true)
+        } catch let error as CocoaError where error.code == .fileNoSuchFile {
             reply(true)
         } catch {
             reply(false)
