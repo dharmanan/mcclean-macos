@@ -5,8 +5,10 @@ actor CleanEngine {
 
     private var allowedRoots: [String] {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let temp = FileManager.default.temporaryDirectory.resolvingSymlinksInPath().standardizedFileURL.path
         return [
             home,
+            temp,
             "/Applications",
             "/Library/Caches",
             "/Library/Logs",
