@@ -1,0 +1,52 @@
+name: CodeQL
+
+"on":
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "22 2 * * 1"
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  analyze:
+    name: Analyze (Swift)
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select installed Xcode
+        run: |
+          shopt -s nullglob
+          xcode_dirs=(/Applications/Xcode*.app/Contents/Developer)
+          if [ ${#xcode_dirs[@]} -eq 0 ]; then
+            echo "No Xcode installation found under /Applications"
+            exit 1
+          fi
+
+          last_index=$((${#xcode_dirs[@]} - 1))
+          sudo xcode-select -switch "${xcode_dirs[$last_index]}"
+          xcodebuild -version
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: swift
+
+      - name: Generate project
+        run: bash ./setup.sh
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
