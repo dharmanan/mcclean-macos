@@ -70,6 +70,16 @@ jobs:
             -archivePath SwiftMac.xcarchive \
             archive
 
+      - name: Patch ExportOptions Team ID
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -z "${APPLE_TEAM_ID}" ]; then
+            echo "Missing APPLE_TEAM_ID secret."
+            exit 1
+          fi
+          /usr/libexec/PlistBuddy -c "Set :teamID ${APPLE_TEAM_ID}" ExportOptions.plist
+
       - name: Export
         run: |
           xcodebuild -exportArchive \

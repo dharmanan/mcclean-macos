@@ -53,11 +53,12 @@ actor CleanEngine {
                 await MainActor.run { progress(item, false) }
                 continue
             }
-            guard FileManager.default.fileExists(atPath: item.url.path) else { continue }
             do {
                 try FileManager.default.removeItem(at: item.url)
                 cleaned += 1; bytesFreed += item.size
                 await MainActor.run { progress(item, true) }
+            } catch let error as CocoaError where error.code == .fileNoSuchFile {
+                continue
             } catch {
                 failed += 1
                 await MainActor.run { progress(item, false) }
@@ -69,10 +70,12 @@ actor CleanEngine {
     func moveToTrash(items: [FileItem]) async -> Int64 {
         var freed: Int64 = 0
         for item in items where item.isSelected {
-            guard isAllowedPath(item.url), FileManager.default.fileExists(atPath: item.url.path) else { continue }
+            guard isAllowedPath(item.url) else { continue }
             do {
                 try FileManager.default.trashItem(at: item.url, resultingItemURL: nil)
                 freed += item.size
+            } catch let error as CocoaError where error.code == .fileNoSuchFile {
+                continue
             } catch {
                 continue
             }

@@ -25,8 +25,6 @@ actor ScanEngine {
 
     func cancel() { isCancelled = true }
 
-    private func shouldCancel() -> Bool { isCancelled }
-
     func scanAll(
         progress: @escaping @MainActor @Sendable (CategoryType, ScanCategory) -> Void
     ) async throws -> [ScanCategory] {
@@ -35,13 +33,16 @@ actor ScanEngine {
 
         return try await withThrowingTaskGroup(of: ScanCategory.self) { group in
             for (type, scanner) in scanners {
-                group.addTask { [weak self] in
+                if isCancelled {
+                    group.cancelAll()
+                    throw CancellationError()
+                }
+
+                group.addTask {
                     try Task.checkCancellation()
-                    if let self, await self.shouldCancel() { throw CancellationError() }
 
                     let items = try await scanner.scan()
                     try Task.checkCancellation()
-                    if let self, await self.shouldCancel() { throw CancellationError() }
 
                     let totalSize = items.reduce(0) { $0 + $1.size }
                     let category = ScanCategory(type: type, items: items, totalSize: totalSize)
