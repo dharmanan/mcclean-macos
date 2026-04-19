@@ -1,12 +1,22 @@
 name: CodeQL
 
 "on":
-  push:
-    branches: [main, develop]
   pull_request:
     branches: [main]
+    paths:
+      - "SwiftMac/**"
+      - "SwiftMacHelper/**"
+      - "SwiftMacTests/**"
+      - "SwiftMacUITests/**"
+      - "project.yml"
+      - ".github/workflows/codeql.yml"
+  workflow_dispatch:
   schedule:
     - cron: "22 2 * * 1"
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   actions: read
