@@ -4,7 +4,7 @@ import AppKit
 
 final class HelperDelegate: NSObject, NSXPCListenerDelegate {
 	private static let allowedClientBundleIdentifiers: Set<String> = [
-		"com.yourname.swiftmac"
+		"com.dharmanan.swiftmac"
 	]
 
 	private func isTrustedClient(_ connection: NSXPCConnection) -> Bool {

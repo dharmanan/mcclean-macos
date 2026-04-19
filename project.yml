@@ -1,6 +1,6 @@
 name: SwiftMac
 options:
-  bundleIdPrefix: com.yourname
+  bundleIdPrefix: com.dharmanan
   deploymentTarget:
     macOS: "14.0"
   xcodeVersion: "16.0"
@@ -21,7 +21,7 @@ targets:
       - path: SwiftMac
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.yourname.swiftmac
+        PRODUCT_BUNDLE_IDENTIFIER: com.dharmanan.swiftmac
         INFOPLIST_FILE: SwiftMac/Resources/Info.plist
         CODE_SIGN_ENTITLEMENTS: SwiftMac/Resources/SwiftMac.entitlements
         ENABLE_PREVIEWS: YES
@@ -36,7 +36,7 @@ targets:
       - target: SwiftMac
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.yourname.swiftmactests
+        PRODUCT_BUNDLE_IDENTIFIER: com.dharmanan.swiftmactests
 
   SwiftMacUITests:
     type: bundle.ui-testing
@@ -47,7 +47,7 @@ targets:
       - target: SwiftMac
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.yourname.swiftmacuitests
+        PRODUCT_BUNDLE_IDENTIFIER: com.dharmanan.swiftmacuitests
 
   SwiftMacHelper:
     type: xpc-service
@@ -56,4 +56,4 @@ targets:
       - path: SwiftMacHelper
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.yourname.swiftmachelper
+        PRODUCT_BUNDLE_IDENTIFIER: com.dharmanan.swiftmachelper

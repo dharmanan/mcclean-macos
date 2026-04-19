@@ -39,8 +39,14 @@ actor AppScanner {
         await terminateIfRunning(bundleIdentifier: app.bundleIdentifier)
         try FileManager.default.trashItem(at: app.bundleURL, resultingItemURL: nil)
         for r in app.residualFiles where r.isSelected {
-            guard isAllowedResidualPath(r.url), FileManager.default.fileExists(atPath: r.url.path) else { continue }
-            try? FileManager.default.removeItem(at: r.url)
+            guard isAllowedResidualPath(r.url) else { continue }
+            do {
+                try FileManager.default.removeItem(at: r.url)
+            } catch let error as CocoaError where error.code == .fileNoSuchFile {
+                continue
+            } catch {
+                continue
+            }
         }
     }
 

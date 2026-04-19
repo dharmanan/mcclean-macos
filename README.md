@@ -56,6 +56,7 @@ smoke-test-macos.sh macOS build and test smoke test
 
 - `setup.sh` validates the checkout and can generate the Xcode project in a macOS environment.
 - `project.yml` is the source of truth for the Xcode target layout.
+- Bundle identifiers are set to `com.dharmanan.*` in `project.yml` and `SwiftMac/Resources/Info.plist`; if you fork, update both and also update `SwiftMacHelper/main.swift` trusted client allowlist.
 - `FEATURE_CHECKLIST.md` contains a manual verification list for the README feature set.
 - In this Linux workspace the app project cannot be generated because `xcodegen` and Xcode are not available. On macOS, `xcodegen generate` is enough.
 - `ExportOptions.plist` still requires a real Apple team ID before archive/export.
