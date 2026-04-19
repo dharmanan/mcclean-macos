@@ -5,6 +5,7 @@ import SwiftUI
 final class AppUninstallerViewModel: ObservableObject {
     @Published var apps: [AppItem] = []
     @Published var isLoading = false
+    @Published var errorMessage: String?
 
     func loadApps() async {
         guard !isLoading else { return }
@@ -14,7 +15,11 @@ final class AppUninstallerViewModel: ObservableObject {
     }
 
     func uninstall(_ app: AppItem) async {
-        try? await AppScanner.shared.uninstall(app)
-        apps.removeAll { $0.id == app.id }
+        do {
+            try await AppScanner.shared.uninstall(app)
+            apps.removeAll { $0.id == app.id }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }

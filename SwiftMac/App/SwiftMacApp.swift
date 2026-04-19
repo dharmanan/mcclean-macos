@@ -8,7 +8,16 @@ struct SwiftMacApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([ScanHistory.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-        return try! ModelContainer(for: schema, configurations: [config])
+        do {
+            return try ModelContainer(for: schema, configurations: [config])
+        } catch {
+            let fallback = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+            do {
+                return try ModelContainer(for: schema, configurations: [fallback])
+            } catch {
+                fatalError("Unable to create SwiftData container: \(error.localizedDescription)")
+            }
+        }
     }()
 
     var body: some Scene {

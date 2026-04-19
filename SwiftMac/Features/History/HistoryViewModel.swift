@@ -1,12 +1,11 @@
 import Foundation
 
-@MainActor
-final class HistoryViewModel: ObservableObject {
-    func totalCleaned(in entries: [ScanHistory]) -> Int64 {
-        entries.reduce(0) { $0 + $1.totalCleaned }
+extension Collection where Element == ScanHistory {
+    var totalCleanedBytes: Int64 {
+        reduce(0) { $0 + $1.totalCleaned }
     }
 
-    func totalScanned(in entries: [ScanHistory]) -> Int64 {
-        entries.reduce(0) { $0 + $1.totalScanned }
+    var totalScannedBytes: Int64 {
+        reduce(0) { $0 + $1.totalScanned }
     }
 }

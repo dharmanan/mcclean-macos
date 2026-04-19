@@ -13,6 +13,7 @@ struct LoginItem: Identifiable {
 @MainActor
 final class LoginItemsViewModel: ObservableObject {
     @Published var items: [LoginItem] = []
+    @Published var unsupportedMessage: String?
 
     func load() async {
         let agentsURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/LaunchAgents")
@@ -35,6 +36,8 @@ final class LoginItemsViewModel: ObservableObject {
 
     func setEnabled(_ enabled: Bool, for item: LoginItem) {
         guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
-        items[index].isEnabled = enabled
+        if enabled != items[index].isEnabled {
+            unsupportedMessage = "Enable/disable is not implemented yet. SwiftMac currently shows login item status only."
+        }
     }
 }

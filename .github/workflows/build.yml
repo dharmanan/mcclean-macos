@@ -77,10 +77,24 @@ jobs:
             -exportPath Export \
             -exportOptionsPlist ExportOptions.plist
 
-      - name: Upload to App Store Connect
+      - name: Notarize Package
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
         run: |
-          xcrun altool --upload-app \
-            --type macos \
-            --file Export/SwiftMac.pkg \
-            --apiKey ${{ secrets.APP_STORE_CONNECT_KEY_ID }} \
-            --apiIssuer ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          if [ -z "${APP_STORE_CONNECT_KEY_ID}" ] || [ -z "${APP_STORE_CONNECT_ISSUER_ID}" ] || [ -z "${APP_STORE_CONNECT_PRIVATE_KEY}" ]; then
+            echo "Missing notarization secrets. Set APP_STORE_CONNECT_KEY_ID, APP_STORE_CONNECT_ISSUER_ID, and APP_STORE_CONNECT_PRIVATE_KEY."
+            exit 1
+          fi
+
+          key_file="$RUNNER_TEMP/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+          printf '%s' "${APP_STORE_CONNECT_PRIVATE_KEY}" > "$key_file"
+
+          xcrun notarytool submit Export/SwiftMac.pkg \
+            --key "$key_file" \
+            --key-id "${APP_STORE_CONNECT_KEY_ID}" \
+            --issuer "${APP_STORE_CONNECT_ISSUER_ID}" \
+            --wait
+
+          xcrun stapler staple Export/SwiftMac.pkg

@@ -36,5 +36,18 @@ struct LoginItemsView: View {
         .task {
             await viewModel.load()
         }
+        .alert(
+            "Not Yet Supported",
+            isPresented: Binding(
+                get: { viewModel.unsupportedMessage != nil },
+                set: { if !$0 { viewModel.unsupportedMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {
+                viewModel.unsupportedMessage = nil
+            }
+        } message: {
+            Text(viewModel.unsupportedMessage ?? "")
+        }
     }
 }

@@ -3,7 +3,6 @@ import SwiftUI
 
 struct HistoryView: View {
     @Query(sort: \ScanHistory.date, order: .reverse) private var history: [ScanHistory]
-    @StateObject private var viewModel = HistoryViewModel()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -11,8 +10,8 @@ struct HistoryView: View {
                 .font(.title2.bold())
 
             HStack(spacing: 24) {
-                Text("Scanned: " + viewModel.totalScanned(in: history).byteString)
-                Text("Cleaned: " + viewModel.totalCleaned(in: history).byteString)
+                Text("Scanned: " + history.totalScannedBytes.byteString)
+                Text("Cleaned: " + history.totalCleanedBytes.byteString)
             }
             .font(.subheadline)
             .foregroundStyle(.secondary)

@@ -3,7 +3,7 @@ import Foundation
 actor CleanEngine {
     static let shared = CleanEngine()
 
-    private var allowedRoots: [String] {
+    private static let allowedRoots: [String] = {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
         let temp = FileManager.default.temporaryDirectory.resolvingSymlinksInPath().standardizedFileURL.path
         return [
@@ -22,11 +22,11 @@ actor CleanEngine {
             "/System/Volumes/Data/.MobileBackups",
             "/Volumes/com.apple.TimeMachine.localsnapshots",
         ]
-    }
+    }()
 
     private func isAllowedPath(_ url: URL) -> Bool {
         let normalizedPath = url.resolvingSymlinksInPath().standardizedFileURL.path
-        return allowedRoots.contains { root in
+        return Self.allowedRoots.contains { root in
             normalizedPath == root || normalizedPath.hasPrefix(root + "/")
         }
     }

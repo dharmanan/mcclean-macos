@@ -61,21 +61,24 @@ struct PurgeableScanner: ScannerProtocol {
         process.executableURL = URL(fileURLWithPath: path)
         process.arguments = arguments
 
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = pipe
+        let outPipe = Pipe()
+        let errPipe = Pipe()
+        process.standardOutput = outPipe
+        process.standardError = errPipe
 
         try process.run()
         process.waitUntilExit()
 
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = String(data: data, encoding: .utf8) ?? ""
+        let outputData = outPipe.fileHandleForReading.readDataToEndOfFile()
+        let errorData = errPipe.fileHandleForReading.readDataToEndOfFile()
+        let output = String(data: outputData, encoding: .utf8) ?? ""
+        let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
 
         guard process.terminationStatus == 0 else {
             throw NSError(
                 domain: "PurgeableScanner",
                 code: Int(process.terminationStatus),
-                userInfo: [NSLocalizedDescriptionKey: output]
+                userInfo: [NSLocalizedDescriptionKey: errorOutput.isEmpty ? output : errorOutput]
             )
         }
 

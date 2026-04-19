@@ -26,3 +26,6 @@ Thumbs.db
 # Secrets
 *.p12
 *.mobileprovision
+
+# Local planning notes
+REMEDIATION_PLAN.md

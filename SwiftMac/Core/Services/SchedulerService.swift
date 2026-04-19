@@ -22,7 +22,7 @@ final class SchedulerService: ObservableObject {
         didSet { UserDefaults.standard.set(interval.rawValue, forKey: "schedulerInterval"); if isEnabled { setup() } }
     }
 
-    private var timer: Timer?
+    private var activityScheduler: NSBackgroundActivityScheduler?
 
     init() {
         self.isEnabled = UserDefaults.standard.bool(forKey: "schedulerEnabled")
@@ -34,14 +34,27 @@ final class SchedulerService: ObservableObject {
 
     private func setup() {
         cancel()
-        timer = Timer.scheduledTimer(withTimeInterval: interval.seconds, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            Task { @MainActor in
+        let scheduler = NSBackgroundActivityScheduler(identifier: "com.dharmanan.swiftmac.clean")
+        scheduler.repeats = true
+        scheduler.interval = interval.seconds
+        scheduler.tolerance = min(interval.seconds * 0.1, 3600)
+        scheduler.qualityOfService = .utility
+        scheduler.schedule { [weak self] completion in
+            guard let self else {
+                completion(.finished)
+                return
+            }
+            Task {
                 await self.run()
+                completion(.finished)
             }
         }
+        activityScheduler = scheduler
     }
-    private func cancel() { timer?.invalidate(); timer = nil }
+    private func cancel() {
+        activityScheduler?.invalidate()
+        activityScheduler = nil
+    }
 
     private func run() async {
         let results = try? await ScanEngine.shared.scanAll { _, _ in }
