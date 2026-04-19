@@ -25,11 +25,10 @@ actor AppScanner {
     }
 
     func uninstall(_ app: AppItem) async throws {
-        NSWorkspace.shared.runningApplications
-            .first { $0.bundleIdentifier == app.bundleIdentifier }?.terminate()
-        try await Task.sleep(nanoseconds: 500_000_000)
+        await terminateIfRunning(bundleIdentifier: app.bundleIdentifier)
         try FileManager.default.trashItem(at: app.bundleURL, resultingItemURL: nil)
         for r in app.residualFiles where r.isSelected {
+            guard FileManager.default.fileExists(atPath: r.url.path) else { continue }
             try? FileManager.default.removeItem(at: r.url)
         }
     }
@@ -44,13 +43,20 @@ actor AppScanner {
             home.appendingPathComponent("Library/Containers/\(bundleId)"),
             home.appendingPathComponent("Library/Saved Application State/\(bundleId).savedState"),
         ]
-        return paths.compactMap { url -> FileItem? in
-            guard FileManager.default.fileExists(atPath: url.path) else { return nil }
-            return FileItem(url: url, size: 0, modifiedDate: nil)
+        var residuals: [FileItem] = []
+        for url in paths {
+            guard FileManager.default.fileExists(atPath: url.path) else { continue }
+            let size = await calcSize(url)
+            residuals.append(FileItem(url: url, size: size, modifiedDate: nil))
         }
+        return residuals
     }
 
     private func calcSize(_ url: URL) async -> Int64 {
+        let rootValues = try? url.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
+        if rootValues?.isRegularFile == true {
+            return Int64(rootValues?.fileSize ?? 0)
+        }
         guard let e = FileManager.default.enumerator(at: url, includingPropertiesForKeys: [.fileSizeKey, .isRegularFileKey]) else { return 0 }
         var total: Int64 = 0
         for case let f as URL in e {
@@ -58,5 +64,25 @@ actor AppScanner {
             if v?.isRegularFile == true { total += Int64(v?.fileSize ?? 0) }
         }
         return total
+    }
+
+    private func terminateIfRunning(bundleIdentifier: String) async {
+        guard let running = NSWorkspace.shared.runningApplications
+            .first(where: { $0.bundleIdentifier == bundleIdentifier }) else { return }
+
+        running.terminate()
+
+        for _ in 0..<30 {
+            if running.isTerminated { return }
+            try? await Task.sleep(nanoseconds: 100_000_000)
+        }
+
+        if !running.isTerminated {
+            running.forceTerminate()
+            for _ in 0..<20 {
+                if running.isTerminated { return }
+                try? await Task.sleep(nanoseconds: 100_000_000)
+            }
+        }
     }
 }

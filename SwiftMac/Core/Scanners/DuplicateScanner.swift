@@ -45,7 +45,17 @@ struct DuplicateScanner: ScannerProtocol {
     }
 
     private func sha256(of url: URL) -> String? {
-        guard let data = try? Data(contentsOf: url, options: .mappedIfSafe) else { return nil }
-        return SHA256.hash(data: data).compactMap { String(format: "%02x", $0) }.joined()
+        let bufferSize = 64 * 1024
+        guard let handle = try? FileHandle(forReadingFrom: url) else { return nil }
+        defer { handle.closeFile() }
+
+        var hasher = SHA256()
+        while true {
+            let data = handle.readData(ofLength: bufferSize)
+            if data.isEmpty { break }
+            hasher.update(data: data)
+        }
+
+        return hasher.finalize().compactMap { String(format: "%02x", $0) }.joined()
     }
 }

@@ -8,25 +8,30 @@ actor ScanEngine {
     static let shared = ScanEngine()
     private var isCancelled = false
 
+    static var scannerCount: Int { configuredScanners().count }
+
+    private static func configuredScanners() -> [(CategoryType, any ScannerProtocol)] {
+        [
+            (.systemJunk,      SystemJunkScanner()),
+            (.userCache,       UserCacheScanner()),
+            (.mailAttachments, MailAttachmentScanner()),
+            (.trash,           TrashScanner()),
+            (.largeFiles,      LargeFileScanner()),
+            (.purgeable,       PurgeableScanner()),
+            (.xcodeJunk,       XcodeScanner()),
+            (.homebrewCache,   HomebrewScanner()),
+        ]
+    }
+
     func cancel() { isCancelled = true }
 
     func scanAll(
         progress: @escaping @MainActor @Sendable (CategoryType, ScanCategory) -> Void
     ) async throws -> [ScanCategory] {
         isCancelled = false
+        let scanners = Self.configuredScanners()
 
         return try await withThrowingTaskGroup(of: ScanCategory.self) { group in
-            let scanners: [(CategoryType, any ScannerProtocol)] = [
-                (.systemJunk,      SystemJunkScanner()),
-                (.userCache,       UserCacheScanner()),
-                (.mailAttachments, MailAttachmentScanner()),
-                (.trash,           TrashScanner()),
-                (.largeFiles,      LargeFileScanner()),
-                (.purgeable,       PurgeableScanner()),
-                (.xcodeJunk,       XcodeScanner()),
-                (.homebrewCache,   HomebrewScanner()),
-            ]
-
             for (type, scanner) in scanners {
                 group.addTask {
                     let items = try await scanner.scan()

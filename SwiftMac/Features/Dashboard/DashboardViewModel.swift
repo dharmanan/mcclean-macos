@@ -11,7 +11,7 @@ class DashboardViewModel: ObservableObject {
 
     enum ScanState { case idle, scanning, done, cleaning }
 
-    private let totalCats = 8
+    private var totalCats: Int { max(ScanEngine.scannerCount, 1) }
     private var count = 0
 
     func startScan() async {
