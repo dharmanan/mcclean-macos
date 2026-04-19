@@ -5,7 +5,18 @@ final class HelperImplementation: NSObject, HelperProtocol {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
         let temp = FileManager.default.temporaryDirectory.resolvingSymlinksInPath().standardizedFileURL.path
         return [
-            home,
+            home + "/Applications",
+            home + "/Desktop",
+            home + "/Documents",
+            home + "/Downloads",
+            home + "/Movies",
+            home + "/Pictures",
+            home + "/.Trash",
+            home + "/.npm",
+            home + "/.yarn",
+            home + "/.pip",
+            home + "/.cache",
+            home + "/Library",
             temp,
             "/Applications",
             "/Library/Caches",
